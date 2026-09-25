@@ -1,4 +1,4 @@
-from crewai import Agent, Crew, Process, Task
+from crewai import Agent, Crew, Process, Task, LLM
 from crewai.project import CrewBase, agent, crew, task
 from crewai.agents.agent_builder.base_agent import BaseAgent
 from crewai_tools import SerperDevTool
@@ -6,7 +6,9 @@ import os
 
 
 # Initialize SerperDevTool
-serper_dev_tool = SerperDevTool(api_key=os.environ.get("SERPER_API_KEY"))
+serper_dev_tool = SerperDevTool(api_key=os.environ.get("SERPER_DEV_API_KEY", ""))
+
+llm = LLM(model=os.environ.get("MODEL", "gpt-4"))
 
 
 @CrewBase
@@ -21,14 +23,16 @@ class VacationPlanner():
         return Agent(
             config=self.agents_config['vacation_researcher'], # type: ignore[index]
             verbose=True,
-            tools=[serper_dev_tool]
+            tools=[serper_dev_tool],
+            llm=llm
         )
 
     @agent
     def itinerary_planner(self) -> Agent:
         return Agent(
             config=self.agents_config['itinerary_planner'], # type: ignore[index]
-            verbose=True
+            verbose=True,
+            llm=llm
         )
 
     @task
